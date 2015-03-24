@@ -4,7 +4,7 @@ angular.module('trendngApp')
   .controller('GameCtrl', function ($scope, $http, socket, c3Factory) {
     $scope.awesomeThings = [];
     $scope.trends = [];
-    $scope.trendupdates = [];
+    var trendupdates = [];
 
     var maxUpdates = 10;
     var curUpdates = 0;
@@ -58,18 +58,18 @@ angular.module('trendngApp')
           ts = updates[hashtag].date;
           //var line = [hashtag, updates[hashtag].value];
           //out.push(line);
-          if (!trends[hashtag]) {
-            trends[hashtag] = [updates[hashtag].value];
+          if (!trendupdates[hashtag]) {
+            trendupdates[hashtag] = [updates[hashtag].value];
           } else {
-            trends[hashtag].push(updates[hashtag].value);
+            trendupdates[hashtag].push(updates[hashtag].value);
           }
         }
-        if (!trends["x"]) {
-          trends["x"] = [Date.parse(ts)];
+        if (!trendupdates["x"]) {
+          trendupdates["x"] = [Date.parse(ts)];
         } else {
-          trends['x'].push(Date.parse(ts));
+          trendupdates['x'].push(Date.parse(ts));
         }
-
+        console.log(trendupdates);
         //out.unshift(['x', Date.parse(ts)])
 
         c3Factory.get('chart').then(function(chart) {
@@ -79,14 +79,21 @@ angular.module('trendngApp')
             length = 1;
           }
           chart.load({
-            columns: trends
+            columns: transformColumns()
             //length: length
           });
         });
       });
     });
 
-
+    var transformColumns = function() {
+      var out = [];
+      for (var key in trendupdates) {
+        out.push([key].concat(trendupdates[key]));
+      }
+      console.log(out);
+      return out;
+    };
 
     $scope.$on('$destroy', function () {
       socket.unsyncUpdates('trend');

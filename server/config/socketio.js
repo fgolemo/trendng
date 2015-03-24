@@ -11,22 +11,15 @@ var hashtagCounts = [0, 0, 0];
 var Trend = require('../api/trend/trend.model');
 var Trendupdate = require('../api/trendupdate/trendupdate.model');
 
+var socketsToUpdate = [];
+
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
+  var i = socketsToUpdate.indexOf(socket);
+  socketsToUpdate.slice(i, 1);
 }
 
-// When the user connects.. perform this
-function onConnect(socket) {
-  // When the client emits 'info', this listens and executes
-  socket.on('info', function (data) {
-    console.info('[%s] %s', socket.address, JSON.stringify(data, null, 2));
-  });
-
-  // Insert sockets below
-  require('../api/trendupdate/trendupdate.socket').register(socket);
-  require('../api/trend/trend.socket').register(socket);
-  require('../api/thing/thing.socket').register(socket);
-
+function twitInit() {
   var T = new Twit({
     consumer_key: config.twitter.clientID,
     consumer_secret: config.twitter.clientSecret,
@@ -62,9 +55,26 @@ function onConnect(socket) {
         date: date
       };
     }
-    socket.emit('trendupdate', out);
+    for (var i in socketsToUpdate) {
+      socketsToUpdate[i].emit('trendupdate', out);
+    }
 
   }, 5000);
+}
+
+// When the user connects.. perform this
+function onConnect(socket) {
+  // When the client emits 'info', this listens and executes
+  socket.on('info', function (data) {
+    console.info('[%s] %s', socket.address, JSON.stringify(data, null, 2));
+  });
+
+  // Insert sockets below
+  require('../api/trendupdate/trendupdate.socket').register(socket);
+  require('../api/trend/trend.socket').register(socket);
+  require('../api/thing/thing.socket').register(socket);
+
+  socketsToUpdate.push(socket);
 }
 
 module.exports = function (socketio) {
@@ -72,6 +82,8 @@ module.exports = function (socketio) {
   // In order to see all the debug output, set DEBUG (in server/config/local.env.js) to including the desired scope.
   //
   // ex: DEBUG: "http*,socket.io:socket"
+
+  twitInit();
 
   socketio.on('connection', function (socket) {
     socket.address = socket.handshake.address !== null ?
