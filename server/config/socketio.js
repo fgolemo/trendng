@@ -13,21 +13,34 @@ var Trendupdate = require('../api/trendupdate/trendupdate.model');
 
 var socketsToUpdate = [];
 
+var streamUpdateFreq = 60000;
+var trendUpdateFreq = 10000;
+
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
   var i = socketsToUpdate.indexOf(socket);
   socketsToUpdate.slice(i, 1);
 }
 
-function twitInit() {
-  var T = new Twit({
-    consumer_key: config.twitter.clientID,
-    consumer_secret: config.twitter.clientSecret,
-    access_token: config.twitter.accessToken,
-    access_token_secret: config.twitter.accessTokenSecret
+function twitUpdateTrends(T) {
+  T.get('trends/place', {id: 1}, function(error, tweets, response){
+    if(error) throw error;
+    //console.log(tweets[0].trends);
+    var out = [];
+    for (var i in tweets[0].trends) {
+      out.push(tweets[0].trends[i].name);
+    }
+    hashtags = out;
+    var outCounts = [];
+    for (var i= 0; i < out.length; i++) {
+      outCounts.push(0);
+    }
+    hashtagCounts = outCounts;
   });
+}
 
-  var stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' })
+function twitGetStream(T) {
+  var stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
 
   stream.on('tweet', function (tweet) {
     for (var i in hashtags) {
@@ -59,7 +72,18 @@ function twitInit() {
       socketsToUpdate[i].emit('trendupdate', out);
     }
 
-  }, 5000);
+  }, streamUpdateFreq);
+}
+
+function twitInit() {
+  var T = new Twit({
+    consumer_key: config.twitter.clientID,
+    consumer_secret: config.twitter.clientSecret,
+    access_token: config.twitter.accessToken,
+    access_token_secret: config.twitter.accessTokenSecret
+  });
+  twitUpdateTrends(T);
+  twitGetStream(T);
 }
 
 // When the user connects.. perform this

@@ -66,7 +66,7 @@ angular.module('trendngApp')
         if (trendupdates['x'].length >= maxUpdates) {
           trendupdates['x'].shift();
         }
-        console.log(trendupdates);
+        //console.log(trendupdates);
 
         c3Factory.get('chart').then(function(chart) {
           chart.load({
@@ -81,7 +81,7 @@ angular.module('trendngApp')
       for (var key in trendupdates) {
         out.push([key].concat(trendupdates[key]));
       }
-      console.log(out);
+      //console.log(out);
       return out;
     };
 
