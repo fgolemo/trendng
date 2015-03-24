@@ -13,8 +13,9 @@ var Trendupdate = require('../api/trendupdate/trendupdate.model');
 
 var socketsToUpdate = [];
 
-var streamUpdateFreq = 60000;
-var trendUpdateFreq = 10000;
+var streamUpdateFreq = 3000;
+var trendUpdateFreq = 60000; // NOT LOWER THAN 60k, i.e. once per minute !
+var stream;
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
@@ -31,6 +32,7 @@ function twitUpdateTrends(T) {
       out.push(tweets[0].trends[i].name);
     }
     hashtags = out;
+    console.log("new trends: "+hashtags.join(", "));
     var outCounts = [];
     for (var i= 0; i < out.length; i++) {
       outCounts.push(0);
@@ -40,7 +42,7 @@ function twitUpdateTrends(T) {
 }
 
 function twitGetStream(T) {
-  var stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
+  stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
 
   stream.on('tweet', function (tweet) {
     for (var i in hashtags) {
@@ -75,6 +77,13 @@ function twitGetStream(T) {
   }, streamUpdateFreq);
 }
 
+function twitUpdateStream(T) {
+  setInterval(function(){
+    twitUpdateTrends(T);
+    stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
+  }, trendUpdateFreq);
+}
+
 function twitInit() {
   var T = new Twit({
     consumer_key: config.twitter.clientID,
@@ -84,6 +93,7 @@ function twitInit() {
   });
   twitUpdateTrends(T);
   twitGetStream(T);
+  twitUpdateStream(T);
 }
 
 // When the user connects.. perform this
