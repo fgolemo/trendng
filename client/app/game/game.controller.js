@@ -46,22 +46,16 @@ angular.module('trendngApp')
       $scope.trends = trends;
       socket.syncUpdates('trend', $scope.trends);
       socket.socket.on('trendupdate', function(updates) {
-        var ts = null;
-        var out = [];
+        var ts;
         for (var hashtag in updates) {
-          //var trend = _.find($scope.trends, {name: hashtag});
-          //if (!trend.updates) {
-          //  trend.updates = [updates[hashtag]];
-          //} else {
-          //  trend.updates.push(updates[hashtag]);
-          //}
           ts = updates[hashtag].date;
-          //var line = [hashtag, updates[hashtag].value];
-          //out.push(line);
           if (!trendupdates[hashtag]) {
             trendupdates[hashtag] = [updates[hashtag].value];
           } else {
             trendupdates[hashtag].push(updates[hashtag].value);
+          }
+          if (trendupdates[hashtag].length >= maxUpdates) {
+            trendupdates[hashtag].shift();
           }
         }
         if (!trendupdates["x"]) {
@@ -69,18 +63,14 @@ angular.module('trendngApp')
         } else {
           trendupdates['x'].push(Date.parse(ts));
         }
+        if (trendupdates['x'].length >= maxUpdates) {
+          trendupdates['x'].shift();
+        }
         console.log(trendupdates);
-        //out.unshift(['x', Date.parse(ts)])
 
         c3Factory.get('chart').then(function(chart) {
-          curUpdates += 1;
-          var length = 0;
-          if (curUpdates >= maxUpdates) {
-            length = 1;
-          }
           chart.load({
             columns: transformColumns()
-            //length: length
           });
         });
       });
