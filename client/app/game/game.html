@@ -1,0 +1,24 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <c3-chart id="chart" config="config"></c3-chart>
+      <h2>Trends</h2>
+      <pre>
+        {{trends|json}}
+      </pre>
+      <h2>Trendupdates</h2>
+      <pre>
+        {{trendupdates|json}}
+      </pre>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+      <p>for "The Social Web" 2015, VU Amsterdam, <br>
+      by Florian Golemo, Marjeta Markovic & Kevin Wezeman</p>
+  </div>
+</footer>
