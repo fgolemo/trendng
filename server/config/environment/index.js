@@ -48,6 +48,7 @@ var all = {
     accessToken: process.env.TWITTER_ACCESS_TOKEN || 'access_token',
     accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET || 'access_token_secret'
   },
+  whatthetrendKey: process.env.WHATTHETREND_KEY || 'secret',
 
 };
 

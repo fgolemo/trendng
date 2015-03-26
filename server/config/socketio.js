@@ -6,16 +6,21 @@
 
 var config = require('./environment');
 var Twit = require('twit');
-var hashtags = ['#KCA', '#DitchYourDateIn5Words', '#FOLLOW'];
-var hashtagCounts = [0, 0, 0];
+var request = require('request-json');
+
+var hashtags = ['#cat', '#dog', '#gameinsight', '#VoteFithHarmony', '#KCA', '#vote5sos', '#Vote1DUK'];
+var hashtagCounts = [0, 0, 0, 0, 0, 0, 0];
 var Trend = require('../api/trend/trend.model');
 var Trendupdate = require('../api/trendupdate/trendupdate.model');
 
 var socketsToUpdate = [];
 
-var streamUpdateFreq = 3000;
+var streamUpdateFreq = 30000;
 var trendUpdateFreq = 60000; // NOT LOWER THAN 60k, i.e. once per minute !
+var numberOfTrends = 5;
 var stream;
+
+var trendClient = request.createClient('http://hashtagify.me/data/');
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
@@ -24,25 +29,53 @@ function onDisconnect(socket) {
 }
 
 function twitUpdateTrends(T) {
-  T.get('trends/place', {id: 1}, function(error, tweets, response){
-    if(error) throw error;
+  T.get('trends/place', {id: 1}, function (error, tweets, response) {
+    if (error) throw error;
     //console.log(tweets[0].trends);
     var out = [];
     for (var i in tweets[0].trends) {
       out.push(tweets[0].trends[i].name);
     }
     hashtags = out;
-    console.log("new trends: "+hashtags.join(", "));
+    console.log("new trends: " + hashtags.join(", "));
     var outCounts = [];
-    for (var i= 0; i < out.length; i++) {
+    for (var i = 0; i < out.length; i++) {
       outCounts.push(0);
     }
     hashtagCounts = outCounts;
   });
 }
 
+function htUpdateTrends(cb) {
+  trendClient.get('popular/30/', function (err, res, body) {
+    var weeks = body['weeks_data'];
+    var max = 0;
+    for (var key in weeks) {
+      if (parseInt(key) > max) {
+        max = parseInt(key);
+      }
+    }
+
+    var out = [];
+    for (var i = 0; i < numberOfTrends * 2; i++) {
+      if (i % 2 == 1) {
+        continue;
+      }
+      out.push('#'+weeks[max][i]);
+    }
+    hashtags = out;
+    console.log("new trends: " + hashtags.join(", "));
+    var outCounts = [];
+    for (var i = 0; i < out.length; i++) {
+      outCounts.push(0);
+    }
+    hashtagCounts = outCounts;
+    cb();
+  });
+}
+
 function twitGetStream(T) {
-  stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
+  stream = T.stream('statuses/filter', {track: hashtags.join(','), language: 'en'});
 
   stream.on('tweet', function (tweet) {
     for (var i in hashtags) {
@@ -55,7 +88,7 @@ function twitGetStream(T) {
     //console.log(tweet.entities.hashtags);
   });
 
-  setInterval(function(){
+  setInterval(function () {
     var hashtagCountsBuffer = JSON.parse(JSON.stringify(hashtagCounts));
     console.log(hashtagCountsBuffer);
     for (var i in hashtagCounts) {
@@ -70,6 +103,7 @@ function twitGetStream(T) {
         date: date
       };
     }
+    //console.log("new trends: " + hashtags.join(", "));
     for (var i in socketsToUpdate) {
       socketsToUpdate[i].emit('trendupdate', out);
     }
@@ -78,9 +112,17 @@ function twitGetStream(T) {
 }
 
 function twitUpdateStream(T) {
-  setInterval(function(){
+  setInterval(function () {
     twitUpdateTrends(T);
-    stream = T.stream('statuses/filter', { track: hashtags.join(','), language: 'en' });
+    stream = T.stream('statuses/filter', {track: hashtags.join(','), language: 'en'});
+  }, trendUpdateFreq);
+}
+
+function htUpdateStream() {
+  setInterval(function () {
+    htUpdateStream(function () {
+      stream = T.stream('statuses/filter', {track: hashtags.join(','), language: 'en'});
+    });
   }, trendUpdateFreq);
 }
 
@@ -91,9 +133,12 @@ function twitInit() {
     access_token: config.twitter.accessToken,
     access_token_secret: config.twitter.accessTokenSecret
   });
-  twitUpdateTrends(T);
-  twitGetStream(T);
-  twitUpdateStream(T);
+  //twitUpdateTrends(T);
+  htUpdateTrends(function () {
+    twitGetStream(T);
+    htUpdateStream();
+  });
+  //twitUpdateStream(T);
 }
 
 // When the user connects.. perform this
@@ -121,8 +166,8 @@ module.exports = function (socketio) {
 
   socketio.on('connection', function (socket) {
     socket.address = socket.handshake.address !== null ?
-            socket.handshake.address.address + ':' + socket.handshake.address.port :
-            process.env.DOMAIN;
+    socket.handshake.address.address + ':' + socket.handshake.address.port :
+      process.env.DOMAIN;
 
     socket.connectedAt = new Date();
 
