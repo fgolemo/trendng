@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('trendngApp')
-  .controller('GameCtrl', function ($scope, $http, socket, c3Factory) {
+  .controller('GameCtrl', function ($scope, $http, socket, c3Factory, Timer) {
     $scope.awesomeThings = [];
     $scope.trends = [];
     var trendupdates = [];
@@ -9,12 +9,11 @@ angular.module('trendngApp')
     var maxUpdates = 10;
     var curUpdates = 0;
 
-    //var addUpdatesList = function(trend) {
-    //  trend.updates = [];
-    //  for (var i=0; i < maxUpdates; i++) {
-    //    trend.updates.push(0);
-    //  }
-    //}
+    var timer;
+
+    $scope.test = "test";
+
+    $scope.timer = Timer.data;
 
     $scope.config = {
       data: {
@@ -41,13 +40,17 @@ angular.module('trendngApp')
     };
 
     var trends = {x:[]};
-
+    $scope.currentHashtags = [];
     $http.get('/api/trends').success(function(trends) {
       $scope.trends = trends;
       socket.syncUpdates('trend', $scope.trends);
       socket.socket.on('trendupdate', function(updates) {
+        countdownReset();
+        countdownStart();
         var ts;
+        var hashtags = [];
         for (var hashtag in updates) {
+          hashtags.push(hashtag);
           ts = updates[hashtag].date;
           if (!trendupdates[hashtag]) {
             trendupdates[hashtag] = [updates[hashtag].value];
@@ -58,6 +61,7 @@ angular.module('trendngApp')
             trendupdates[hashtag].shift();
           }
         }
+        $scope.currentHashtags = hashtags;
         if (!trendupdates["x"]) {
           trendupdates["x"] = [Date.parse(ts)];
         } else {
@@ -66,15 +70,43 @@ angular.module('trendngApp')
         if (trendupdates['x'].length >= maxUpdates) {
           trendupdates['x'].shift();
         }
-        //console.log(trendupdates);
 
         c3Factory.get('chart').then(function(chart) {
           chart.load({
             columns: transformColumns()
           });
         });
+
       });
     });
+
+    var countdownStart = function() {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function(){
+        countdown();
+        if ($scope.timer.val > 0) {
+          countdownStart();
+        }
+      }, 1000);
+    };
+
+    var countdown = function() {
+      $scope.test = "222";
+      $scope.timer.val -= 1;
+      var text = $scope.timer.val + "";
+      if (text.length == 1) {
+        text = "0"+text;
+      }
+      $scope.timer.time = "00:"+text;
+      $scope.$apply();
+    };
+
+    var countdownReset = function() {
+      $scope.timer.val = 60;
+      $scope.timer.time = "01:00";
+    };
 
     var transformColumns = function() {
       var out = [];
