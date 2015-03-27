@@ -20,19 +20,37 @@
             {{ht}}
           </div>
           <div class="col-md-2">
-            up/down
+            <div class="btn-group">
+              <label class="btn btn-success" ng-model="bet[$index]" btn-radio="'up'" uncheckable>
+                <fa name="arrow-up"></fa> Up
+              </label>
+              <label class="btn btn-danger" ng-model="bet[$index]" btn-radio="'down'" uncheckable>
+                <fa name="arrow-down"></fa> Down
+              </label>
+            </div>
+
+
           </div>
           <div class="col-md-2">
-            money field
+            <input type="text" ng-model="betMoney[$index]" ui-money-mask min="0" max="100">
           </div>
           <div class="col-md-2">
-            button
+            <button type="button" ng-model="betPlaced[$index]" class="btn btn-info"
+                    btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">Place Bet!</button>
           </div>
           <div class="col-md-3">
-            status msg
+            <p class="text-muted">place your bet if you dare</p>
           </div>
         </div>
       </div>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <pre>
+        {{bet|json}}
+      </pre>
     </div>
   </div>
 </div>

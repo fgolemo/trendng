@@ -4,12 +4,17 @@ angular.module('trendngApp')
   .controller('GameCtrl', function ($scope, $http, socket, c3Factory, Timer) {
     $scope.awesomeThings = [];
     $scope.trends = [];
+    $scope.bet = [null, null, null, null, null];
+    $scope.betMoney = [0, 0, 0, 0, 0];
+    $scope.betPlaced = [0, 0, 0, 0, 0];
     var trendupdates = [];
 
     var maxUpdates = 10;
     var curUpdates = 0;
 
     var timer;
+
+    $scope.account = 100;
 
     $scope.test = "test";
 

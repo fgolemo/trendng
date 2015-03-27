@@ -15,7 +15,7 @@ var Trendupdate = require('../api/trendupdate/trendupdate.model');
 
 var socketsToUpdate = [];
 
-var streamUpdateFreq = 10000;
+var streamUpdateFreq = 5000;
 var trendUpdateFreq = 60000; // NOT LOWER THAN 60k, i.e. once per minute !
 var numberOfTrends = 5;
 var stream;
