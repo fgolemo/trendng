@@ -17,7 +17,7 @@ angular.module('trendngApp')
         color: "text-muted"
       },
       timeout: {
-        text: "nothing goes",
+        text: "wait, waiiiiit",
         color: "text-warning"
       },
       noamount: {
@@ -37,14 +37,17 @@ angular.module('trendngApp')
 
     var maxUpdates = 10;
     var curUpdates = 0;
-
+    var timeout = 5; // how many seconds before the end does the lock kick in
+    var timerMax = 30;
+    var timerText = "00:30";
     var timer;
 
     $scope.account = 100;
 
-    $scope.test = "test";
+    $scope.progressbarType = "primary";
 
     $scope.timer = Timer.data;
+    $scope.timer.max = timerMax;
 
     $scope.config = {
       data: {
@@ -70,6 +73,17 @@ angular.module('trendngApp')
       }
     };
 
+    var nothingGoes = function() {
+      for ( var i = 0; i < 5; i++ ){
+        $scope.betDisabled[i] = true;
+        if (!$scope.betPlaced[i]) {
+          $scope.betTexts[i] = betTexts.timeout.text;
+          $scope.betTextsColor[i] = betTexts.timeout.color;
+        }
+      }
+      $scope.progressbarType = "danger";
+    };
+
     var resetBetTexts = function() {
       for ( var i = 0; i < 5; i++ ){
         if (!$scope.betPlaced[i]) {
@@ -78,6 +92,7 @@ angular.module('trendngApp')
         }
         $scope.betDisabled[i] = false;
       }
+      $scope.progressbarType = "primary";
     };
 
     var trends = {x:[]};
@@ -134,19 +149,21 @@ angular.module('trendngApp')
     };
 
     var countdown = function() {
-      $scope.test = "222";
       $scope.timer.val -= 1;
       var text = $scope.timer.val + "";
       if (text.length == 1) {
         text = "0"+text;
       }
       $scope.timer.time = "00:"+text;
+      if ($scope.timer.val == timeout) {
+        nothingGoes();
+      }
       $scope.$apply();
     };
 
     var countdownReset = function() {
-      $scope.timer.val = 60;
-      $scope.timer.time = "01:00";
+      $scope.timer.val = timerMax;
+      $scope.timer.time = timerText;
     };
 
     var transformColumns = function() {
@@ -172,11 +189,18 @@ angular.module('trendngApp')
       return true;
     };
 
+    var payout = function() {
+      for (var i =0; i < 5; i++) {
+
+      }
+    };
+
     $scope.placebet = function(i) {
       if (betIsValid(i)){
         $scope.betDisabled[i] = true;
         $scope.betTexts[i] = betTexts.betplaced.text.format($scope.betMoney[i], $scope.betTrend[i]);
         $scope.betTextsColor[i] = betTexts.betplaced.color;
+        $scope.betPlaced[i] = true;
       } else {
         //$scope.betPlaced[i] = 0;
       }

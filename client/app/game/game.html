@@ -5,13 +5,13 @@
     <div class="col-lg-12">
       <c3-chart id="chart" config="config"></c3-chart>
       <div ng-show="currentHashtags.length == 0">
-        <h2>Please wait one minute for the app to gather the first batch of data points.</h2>
+        <h2>Please wait 30 seconds for the app to gather the first batch of data points.</h2>
       </div>
       <div ng-show="currentHashtags.length != 0">
         <div class="row betting">
           <div class="col-md-3"><h2>Place your bet!</h2></div>
           <div class="col-md-9">
-            <progressbar max="timer.max" class="progress-striped active" value="timer.val">{{timer.time}}</progressbar>
+            <progressbar max="timer.max" class="progress-striped active" value="timer.val" type="{{progressbarType}}">{{timer.time}}</progressbar>
           </div>
         </div>
 
