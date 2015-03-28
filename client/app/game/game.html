@@ -21,10 +21,10 @@
           </div>
           <div class="col-md-2">
             <div class="btn-group">
-              <label class="btn btn-success" ng-model="bet[$index]" btn-radio="'up'" uncheckable>
+              <label class="btn btn-success" ng-model="betTrend[$index]" btn-radio="'UP'" uncheckable ng-disabled="betDisabled[$index]">
                 <fa name="arrow-up"></fa> Up
               </label>
-              <label class="btn btn-danger" ng-model="bet[$index]" btn-radio="'down'" uncheckable>
+              <label class="btn btn-danger" ng-model="betTrend[$index]" btn-radio="'DOWN'" uncheckable ng-disabled="betDisabled[$index]">
                 <fa name="arrow-down"></fa> Down
               </label>
             </div>
@@ -32,14 +32,13 @@
 
           </div>
           <div class="col-md-2">
-            <input type="text" ng-model="betMoney[$index]" ui-money-mask min="0" max="100">
+            <input type="text" ng-model="betMoney[$index]" ui-money-mask min="0" max="100" ng-disabled="betDisabled[$index]">
           </div>
           <div class="col-md-2">
-            <button type="button" ng-model="betPlaced[$index]" class="btn btn-info"
-                    btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">Place Bet!</button>
+            <button type="button" ng-model="betPlaced[$index]" ng-click="placebet($index)" class="btn btn-info" ng-disabled="betDisabled[$index]">Place Bet!</button>
           </div>
           <div class="col-md-3">
-            <p class="text-muted">place your bet if you dare</p>
+            <p ng-class="betTextsColor[$index]">{{betTexts[$index]}}</p>
           </div>
         </div>
       </div>
@@ -49,7 +48,7 @@
   <div class="row">
     <div class="col-xs-12">
       <pre>
-        {{bet|json}}
+        {{account|json}}
       </pre>
     </div>
   </div>

@@ -4,9 +4,35 @@ angular.module('trendngApp')
   .controller('GameCtrl', function ($scope, $http, socket, c3Factory, Timer) {
     $scope.awesomeThings = [];
     $scope.trends = [];
-    $scope.bet = [null, null, null, null, null];
+    $scope.betDisabled = [false, false, false, false, false];
+    $scope.betTrend = [null, null, null, null, null];
     $scope.betMoney = [0, 0, 0, 0, 0];
     $scope.betPlaced = [0, 0, 0, 0, 0];
+    $scope.bets = [];
+    $scope.betTexts = ["", "", "", "", ""];
+    $scope.betTextsColor = ["text-muted", "text-muted", "text-muted", "text-muted", "text-muted"];
+    var betTexts = {
+      idle: {
+        text:"place your bets",
+        color: "text-muted"
+      },
+      timeout: {
+        text: "nothing goes",
+        color: "text-warning"
+      },
+      noamount: {
+        text: "please input an amount to bet",
+        color: "text-primary"
+      },
+      notrend: {
+        text: "please click either UP or DOWN",
+        color: "text-primary"
+      },
+      betplaced: {
+        text: "you bet {0}$ the trend will go {1}",
+        color: "text-info"
+      }
+    };
     var trendupdates = [];
 
     var maxUpdates = 10;
@@ -41,6 +67,16 @@ angular.module('trendngApp')
         y: {
           show: true
         }
+      }
+    };
+
+    var resetBetTexts = function() {
+      for ( var i = 0; i < 5; i++ ){
+        if (!$scope.betPlaced[i]) {
+          $scope.betTexts[i] = betTexts.idle.text;
+          $scope.betTextsColor[i] = betTexts.idle.color;
+        }
+        $scope.betDisabled[i] = false;
       }
     };
 
@@ -81,7 +117,7 @@ angular.module('trendngApp')
             columns: transformColumns()
           });
         });
-
+        resetBetTexts();
       });
     });
 
@@ -120,6 +156,31 @@ angular.module('trendngApp')
       }
       //console.log(out);
       return out;
+    };
+
+    var betIsValid = function(i) {
+      if (!$scope.betTrend[i]) {
+        $scope.betTexts[i] = betTexts.notrend.text;
+        $scope.betTextsColor[i] = betTexts.notrend.color;
+        return false;
+      }
+      if ($scope.betMoney[i] <= 0) {
+        $scope.betTexts[i] = betTexts.noamount.text;
+        $scope.betTextsColor[i] = betTexts.noamount.color;
+        return false;
+      }
+      return true;
+    };
+
+    $scope.placebet = function(i) {
+      if (betIsValid(i)){
+        $scope.betDisabled[i] = true;
+        $scope.betTexts[i] = betTexts.betplaced.text.format($scope.betMoney[i], $scope.betTrend[i]);
+        $scope.betTextsColor[i] = betTexts.betplaced.color;
+      } else {
+        //$scope.betPlaced[i] = 0;
+      }
+
     };
 
     $scope.$on('$destroy', function () {

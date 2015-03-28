@@ -18,7 +18,8 @@
     "c3": "~0.4.10",
     "angular-c3": "~0.0.7",
     "angular-fontawesome": "~0.3.2",
-    "angular-input-masks": "~1.4.0"
+    "angular-input-masks": "~1.4.0",
+    "string-formatter": "~0.0.2"
   },
   "devDependencies": {
     "angular-mocks": ">=1.2.*",
