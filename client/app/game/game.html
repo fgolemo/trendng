@@ -16,10 +16,10 @@
         </div>
 
         <div class="row" ng-repeat="ht in currentHashtags">
-          <div class="col-md-3">
+          <div class="col-xs-3">
             {{ht}}
           </div>
-          <div class="col-md-2">
+          <div class="col-xs-2">
             <div class="btn-group">
               <label class="btn btn-success" ng-model="betTrend[$index]" btn-radio="'UP'" uncheckable ng-disabled="betDisabled[$index]">
                 <fa name="arrow-up"></fa> Up
@@ -31,13 +31,13 @@
 
 
           </div>
-          <div class="col-md-2">
+          <div class="col-xs-2">
             <input type="text" ng-model="betMoney[$index]" ui-money-mask min="0" max="100" ng-disabled="betDisabled[$index]">
           </div>
-          <div class="col-md-2">
+          <div class="col-xs-2">
             <button type="button" ng-model="betPlaced[$index]" ng-click="placebet($index)" class="btn btn-info" ng-disabled="betDisabled[$index]">Place Bet!</button>
           </div>
-          <div class="col-md-3">
+          <div class="col-xs-3">
             <p ng-class="betTextsColor[$index]">{{betTexts[$index]}}</p>
           </div>
         </div>
