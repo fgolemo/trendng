@@ -46,6 +46,7 @@ angular.module('trendngApp')
     var maxUpdates = 10;
     var curUpdates = 0;
     var timeout = 5; // how many seconds before the end does the lock kick in
+    var timeoutWarning = 10; // how many seconds before the end does the warning appear
     var timerMax = 30;
     var timerText = '00:30';
     var timer;
@@ -90,6 +91,10 @@ angular.module('trendngApp')
         }
       }
       $scope.progressbarType = 'danger';
+    };
+
+    var nothingGoesWarning = function() {
+      $scope.progressbarType = 'warning';
     };
 
     var resetBetTexts = function() {
@@ -168,6 +173,9 @@ angular.module('trendngApp')
       $scope.timer.time = '00:'+text;
       if ($scope.timer.val === timeout) {
         nothingGoes();
+      }
+      if ($scope.timer.val === timeoutWarning) {
+        nothingGoesWarning();
       }
       $scope.$apply();
     };

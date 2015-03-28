@@ -127,6 +127,7 @@ function htUpdateStream(T) {
 }
 
 function twitInit() {
+  console.log(config.twitter.clientID + ", " + config.twitter.clientSecret + ", " + config.twitter.accessToken + ", " + config.twitter.accessTokenSecret);
   var T = new Twit({
     consumer_key: config.twitter.clientID,
     consumer_secret: config.twitter.clientSecret,
