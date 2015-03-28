@@ -18,13 +18,13 @@ var socketsToUpdate = [];
 var streamUpdateFreq = 30000;
 var trendUpdateFreq = 15 * 60000; // NOT LOWER THAN 60k, i.e. once per minute !
 var numberOfTrends = 5;
-var stream;
+var stream, i;
 
 var trendClient = request.createClient('http://hashtagify.me/data/');
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
-  var i = socketsToUpdate.indexOf(socket);
+  i = socketsToUpdate.indexOf(socket);
   socketsToUpdate.slice(i, 1);
 }
 
@@ -33,13 +33,13 @@ function twitUpdateTrends(T) {
     if (error) throw error;
     //console.log(tweets[0].trends);
     var out = [];
-    for (var i in tweets[0].trends) {
+    for (i in tweets[0].trends) {
       out.push(tweets[0].trends[i].name);
     }
     hashtags = out;
     console.log("new trends: " + hashtags.join(", "));
     var outCounts = [];
-    for (var i = 0; i < out.length; i++) {
+    for (i = 0; i < out.length; i++) {
       outCounts.push(0);
     }
     hashtagCounts = outCounts;
@@ -48,7 +48,7 @@ function twitUpdateTrends(T) {
 
 function htUpdateTrends(cb) {
   trendClient.get('popular/30/', function (err, res, body) {
-    var weeks = body['weeks_data'];
+    var weeks = body.weeks_data;
     var max = 0;
     for (var key in weeks) {
       if (parseInt(key) > max) {
@@ -58,7 +58,7 @@ function htUpdateTrends(cb) {
 
     var out = [];
     for (var i = 0; i < numberOfTrends * 2; i++) {
-      if (i % 2 == 1) {
+      if (i % 2 === 1) {
         continue;
       }
       out.push('#'+weeks[max][i]);
@@ -66,7 +66,7 @@ function htUpdateTrends(cb) {
     hashtags = out;
     console.log("new trends: " + hashtags.join(", "));
     var outCounts = [];
-    for (var i = 0; i < out.length; i++) {
+    for (i = 0; i < out.length; i++) {
       outCounts.push(0);
     }
     hashtagCounts = outCounts;
@@ -78,9 +78,9 @@ function twitGetStream(T) {
   stream = T.stream('statuses/filter', {track: hashtags.join(','), language: 'en'});
 
   stream.on('tweet', function (tweet) {
-    for (var i in hashtags) {
+    for (i in hashtags) {
       for (var j in tweet.entities.hashtags) {
-        if (tweet.entities.hashtags[j].text.toLowerCase() == hashtags[i].substring(1).toLowerCase()) {
+        if (tweet.entities.hashtags[j].text.toLowerCase() === hashtags[i].substring(1).toLowerCase()) {
           hashtagCounts[i] += 1;
         }
       }
@@ -91,20 +91,20 @@ function twitGetStream(T) {
   setInterval(function () {
     var hashtagCountsBuffer = JSON.parse(JSON.stringify(hashtagCounts));
     console.log(hashtagCountsBuffer);
-    for (var i in hashtagCounts) {
+    for (i in hashtagCounts) {
       hashtagCounts[i] = 0
     }
     var out = {};
 
     var date = new Date().toISOString();
-    for (var i in hashtags) {
+    for (i in hashtags) {
       out[hashtags[i]] = {
         value: hashtagCountsBuffer[i],
         date: date
       };
     }
     //console.log("new trends: " + hashtags.join(", "));
-    for (var i in socketsToUpdate) {
+    for (i in socketsToUpdate) {
       socketsToUpdate[i].emit('trendupdate', out);
     }
 
@@ -118,7 +118,7 @@ function twitUpdateStream(T) {
   }, trendUpdateFreq);
 }
 
-function htUpdateStream() {
+function htUpdateStream(T) {
   setInterval(function () {
     htUpdateStream(function () {
       stream = T.stream('statuses/filter', {track: hashtags.join(','), language: 'en'});
@@ -136,7 +136,7 @@ function twitInit() {
   //twitUpdateTrends(T);
   htUpdateTrends(function () {
     twitGetStream(T);
-    htUpdateStream();
+    htUpdateStream(T);
   });
   //twitUpdateStream(T);
 }

@@ -9,36 +9,36 @@ angular.module('trendngApp')
     $scope.betMoney = [0, 0, 0, 0, 0];
     $scope.betPlaced = [0, 0, 0, 0, 0];
     $scope.bets = [];
-    $scope.betTexts = ["", "", "", "", ""];
-    $scope.betTextsColor = ["text-muted", "text-muted", "text-muted", "text-muted", "text-muted"];
+    $scope.betTexts = ['', '', '', '', ''];
+    $scope.betTextsColor = ['text-muted', 'text-muted', 'text-muted', 'text-muted', 'text-muted'];
     var betTexts = {
       idle: {
-        text:"place your bets",
-        color: "text-muted"
+        text:'place your bets',
+        color: 'text-muted'
       },
       timeout: {
-        text: "wait, waiiiiit",
-        color: "text-warning"
+        text: 'wait, waiiiiit',
+        color: 'text-warning'
       },
       noamount: {
-        text: "please input an amount to bet",
-        color: "text-primary"
+        text: 'please input an amount to bet',
+        color: 'text-primary'
       },
       notrend: {
-        text: "please click either UP or DOWN",
-        color: "text-primary"
+        text: 'please click either UP or DOWN',
+        color: 'text-primary'
       },
       betplaced: {
-        text: "you bet {0}$ the trend will go {1}",
-        color: "text-info"
+        text: 'you bet {0}$ the trend will go {1}',
+        color: 'text-info'
       },
       won: {
-        text: "YAY, YOU'VE WON {0}$",
-        color: "text-success"
+        text: 'YAY, YOU\'VE WON {0}$',
+        color: 'text-success'
       },
       lost: {
-        text: "sorry, the bet is lost",
-        color: "text-danger"
+        text: 'sorry, the bet is lost',
+        color: 'text-danger'
       }
     };
     var trendupdates = [];
@@ -47,12 +47,12 @@ angular.module('trendngApp')
     var curUpdates = 0;
     var timeout = 5; // how many seconds before the end does the lock kick in
     var timerMax = 30;
-    var timerText = "00:30";
+    var timerText = '00:30';
     var timer;
 
     $scope.account = 100;
 
-    $scope.progressbarType = "primary";
+    $scope.progressbarType = 'primary';
 
     $scope.timer = Timer.data;
     $scope.timer.max = timerMax;
@@ -89,7 +89,7 @@ angular.module('trendngApp')
           $scope.betTextsColor[i] = betTexts.timeout.color;
         }
       }
-      $scope.progressbarType = "danger";
+      $scope.progressbarType = 'danger';
     };
 
     var resetBetTexts = function() {
@@ -103,10 +103,9 @@ angular.module('trendngApp')
         $scope.betMoney[i] = 0;
         $scope.betTrend[i] = null;
       }
-      $scope.progressbarType = "primary";
+      $scope.progressbarType = 'primary';
     };
 
-    var trends = {x:[]};
     $scope.currentHashtags = [];
     $http.get('/api/trends').success(function(trends) {
       $scope.trends = trends;
@@ -129,13 +128,13 @@ angular.module('trendngApp')
           }
         }
         $scope.currentHashtags = hashtags;
-        if (!trendupdates["x"]) {
-          trendupdates["x"] = [Date.parse(ts)];
+        if (!trendupdates.x) {
+          trendupdates.x = [Date.parse(ts)];
         } else {
-          trendupdates['x'].push(Date.parse(ts));
+          trendupdates.x.push(Date.parse(ts));
         }
-        if (trendupdates['x'].length >= maxUpdates) {
-          trendupdates['x'].shift();
+        if (trendupdates.x.length >= maxUpdates) {
+          trendupdates.x.shift();
         }
 
         c3Factory.get('chart').then(function(chart) {
@@ -162,12 +161,12 @@ angular.module('trendngApp')
 
     var countdown = function() {
       $scope.timer.val -= 1;
-      var text = $scope.timer.val + "";
-      if (text.length == 1) {
-        text = "0"+text;
+      var text = $scope.timer.val + '';
+      if (text.length === 1) {
+        text = '0'+text;
       }
-      $scope.timer.time = "00:"+text;
-      if ($scope.timer.val == timeout) {
+      $scope.timer.time = '00:'+text;
+      if ($scope.timer.val === timeout) {
         nothingGoes();
       }
       $scope.$apply();
@@ -207,12 +206,12 @@ angular.module('trendngApp')
           var hashtag = $scope.currentHashtags[i];
           var oldVal = trendupdates[hashtag][trendupdates[hashtag].length-2];
           var newVal = trendupdates[hashtag][trendupdates[hashtag].length-1];
-          var winUp = ($scope.betTrend[i] == "UP" && oldVal < newVal);
-          var winDown = ($scope.betTrend[i] == "DOWN" && oldVal > newVal);
+          var winUp = ($scope.betTrend[i] === 'UP' && oldVal < newVal);
+          var winDown = ($scope.betTrend[i] === 'DOWN' && oldVal > newVal);
 
           if (winUp || winDown) {
             $scope.betTexts[i] = betTexts.won.text.format($scope.betMoney[i]);
-            $scope.betTextsColor[i] = betTexts.won.color + " flash";
+            $scope.betTextsColor[i] = betTexts.won.color + ' flash';
             $scope.account += $scope.betMoney[i];
           } else {
             $scope.betTexts[i] = betTexts.lost.text.format($scope.betMoney[i]);
