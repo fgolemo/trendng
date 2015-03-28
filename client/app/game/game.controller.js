@@ -31,6 +31,14 @@ angular.module('trendngApp')
       betplaced: {
         text: "you bet {0}$ the trend will go {1}",
         color: "text-info"
+      },
+      won: {
+        text: "YAY, YOU'VE WON {0}$",
+        color: "text-success"
+      },
+      lost: {
+        text: "sorry, the bet is lost",
+        color: "text-danger"
       }
     };
     var trendupdates = [];
@@ -91,6 +99,9 @@ angular.module('trendngApp')
           $scope.betTextsColor[i] = betTexts.idle.color;
         }
         $scope.betDisabled[i] = false;
+        $scope.betPlaced[i] = false;
+        $scope.betMoney[i] = 0;
+        $scope.betTrend[i] = null;
       }
       $scope.progressbarType = "primary";
     };
@@ -132,6 +143,7 @@ angular.module('trendngApp')
             columns: transformColumns()
           });
         });
+        payout();
         resetBetTexts();
       });
     });
@@ -191,7 +203,23 @@ angular.module('trendngApp')
 
     var payout = function() {
       for (var i =0; i < 5; i++) {
+        if ($scope.betPlaced[i]) {
+          var hashtag = $scope.currentHashtags[i];
+          var oldVal = trendupdates[hashtag][trendupdates[hashtag].length-2];
+          var newVal = trendupdates[hashtag][trendupdates[hashtag].length-1];
+          var winUp = ($scope.betTrend[i] == "UP" && oldVal < newVal);
+          var winDown = ($scope.betTrend[i] == "DOWN" && oldVal > newVal);
 
+          if (winUp || winDown) {
+            $scope.betTexts[i] = betTexts.won.text.format($scope.betMoney[i]);
+            $scope.betTextsColor[i] = betTexts.won.color + " flash";
+            $scope.account += $scope.betMoney[i];
+          } else {
+            $scope.betTexts[i] = betTexts.lost.text.format($scope.betMoney[i]);
+            $scope.betTextsColor[i] = betTexts.lost.color;
+            $scope.account -= $scope.betMoney[i];
+          }
+        }
       }
     };
 
